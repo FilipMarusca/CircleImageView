@@ -153,6 +153,9 @@ public class CircleImageView extends ImageView {
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         setup();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            setOutlineProvider(new CustomOutline(w, h));
+        }
     }
 
     @Override
@@ -433,6 +436,29 @@ public class CircleImageView extends ImageView {
         mShaderMatrix.postTranslate((int) (dx + 0.5f) + mDrawableRect.left, (int) (dy + 0.5f) + mDrawableRect.top);
 
         mBitmapShader.setLocalMatrix(mShaderMatrix);
+    }
+    
+    private class CustomOutline extends ViewOutlineProvider {
+        int width;
+        int height;
+
+        CustomOutline(int width, int height) {
+            this.width = width;
+            this.height = height;
+        }
+
+        @Override
+        public void getOutline(View view, Outline outline) {
+            int availableWidth = getWidth() - getPaddingLeft() - getPaddingRight();
+            int availableHeight = getHeight() - getPaddingTop() - getPaddingBottom();
+
+            int sideLength = Math.min(availableWidth, availableHeight);
+
+            int left = getPaddingLeft() + (availableWidth - sideLength) / 2;
+            int top = getPaddingTop() + (availableHeight - sideLength) / 2;
+
+            outline.setRoundRect(left, top, left + sideLength, top + sideLength, mBorderRadius);
+        }
     }
 
 }
